@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/system-log-out.png</file>
+        <file>icons/qt_extended.png</file>
+        <file>icons/grid.png</file>
+        <file>scenes/bezier/simpletriangle.bezier</file>
+        <file>shaders/tessellation/fragment.glsl</file>
+        <file>shaders/tessellation/geometry.glsl</file>
+        <file>shaders/tessellation/tess_control.glsl</file>
+        <file>shaders/tessellation/tess_eval.glsl</file>
+        <file>shaders/tessellation/vertex.glsl</file>
+        <file>shaders/simple/fragment.glsl</file>
+        <file>shaders/simple/vertex.glsl</file>
+    </qresource>
+</RCC>
