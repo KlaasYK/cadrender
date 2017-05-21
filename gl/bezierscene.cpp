@@ -1,5 +1,7 @@
 #include <gl/bezierscene.h>
 
+#include <QThread>
+
 // -----------------------------------------------------------------------------
 // -- Constructors and destructor ----------------------------------------------
 // -----------------------------------------------------------------------------
@@ -26,18 +28,24 @@ BezierScene::~BezierScene() {
 
 // --- Public ------------------------------------------------------------------
 
-void BezierScene::render(QOpenGLShaderProgram &program)
+void BezierScene::render(const QOpenGLShaderProgram &program)
 {
     if (!_isInit) {
         initialize();
     }
-    program.bind();
+
+    //program.bind();
+
+
     glBindVertexArray(_sceneVAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _patchIBO);
-    glDrawElements(GL_PATCHES, _patches.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_PATCHES, _patches.size() * 10 , GL_UNSIGNED_INT, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    program.release();
+
+
+
+    //program.release();
 }
 
 // --- Protected ---------------------------------------------------------------

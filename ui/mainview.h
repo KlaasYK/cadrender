@@ -4,6 +4,9 @@
 #include <geom/beziertriangle.h>
 #include <gl/bezierscene.h>
 
+
+#include <QMatrix3x3>
+#include <QMatrix4x4>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLShaderProgram>
@@ -41,6 +44,15 @@ protected:
     // -- Signals and slots ----------------------------------------------------
     // =========================================================================
 
+signals:
+
+    void onPrimitivesDrawn(int numPrimitives);
+
+public slots:
+
+    void onXRotation(int rotation);
+    void onYRotation(int rotation);
+
 private slots:
 
     void onMessageLogged(QOpenGLDebugMessage message);
@@ -68,6 +80,10 @@ private:
     QPointer<QOpenGLShaderProgram> _tessProgram;
 
     QSharedPointer<BezierScene> _scene;
+
+    int _xRot, _yRot;
+
+    GLuint _primitiveQuery;
 
 };
 

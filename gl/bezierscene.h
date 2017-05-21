@@ -46,7 +46,7 @@ public:
 public:
 
     // TODO: add render settings (such as wireframe, faces etc.)
-    void render(QOpenGLShaderProgram &program);
+    void render(const QOpenGLShaderProgram &program);
 
 protected:
 

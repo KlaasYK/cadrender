@@ -12,6 +12,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    connect(ui->xSlider, SIGNAL(valueChanged(int)),
+            ui->mainView, SLOT(onXRotation(int)));
+    connect(ui->ySlider, SIGNAL(valueChanged(int)),
+            ui->mainView, SLOT(onYRotation(int)));
+    connect(ui->mainView, SIGNAL(onPrimitivesDrawn(int)),
+            this, SLOT(onPrimitivesDrawn(int)));
+
 }
 
 MainWindow::~MainWindow()
@@ -29,4 +37,8 @@ void MainWindow::closeApplication() {
 
 void MainWindow::aboutQt() {
     QApplication::aboutQt();
+}
+
+void MainWindow::onPrimitivesDrawn(int numPrimitives) {
+    this->statusBar()->showMessage(QString("%1 primitives").arg(numPrimitives));
 }

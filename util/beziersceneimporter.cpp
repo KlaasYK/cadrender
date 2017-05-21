@@ -53,8 +53,8 @@ const QVector4D BezierSceneImporter::interpolateTriCenterPoint(const QVector<QVe
     // Midpoints are interpolated using: G. Farin
     // Curves and Surfaces for CAGD, p. 342
     const QVector4D UV111 =
-            1/4 * (UV201 + UV102 + UV021 + UV012 + UV210 + UV120)
-            -  1/6 * (UV300 + UV030 + UV003);
+            1.0/4.0 * (UV201 + UV102 + UV021 + UV012 + UV210 + UV120)
+            -  1.0/6.0 * (UV300 + UV030 + UV003);
 
     return UV111;
 }
@@ -72,7 +72,7 @@ void BezierSceneImporter::parsePatch(
     // TODO: check for QUAD patches
 
     for (unsigned i = 1; i < 10; ++i) {
-        unsigned index = tokens.at(1).toUInt();
+        unsigned index = tokens.at(i).toUInt();
         Q_ASSERT(index < static_cast<unsigned>(vertices.size()));
         indices.push_back(index);
         patchVertices.push_back(vertices.at(index));

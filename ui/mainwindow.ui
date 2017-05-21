@@ -67,7 +67,7 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="shadingLbl">
        <property name="text">
         <string>Shading</string>
        </property>
@@ -85,6 +85,57 @@
          <string>Flat shaded</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QSlider" name="xSlider">
+       <property name="maximum">
+        <number>360</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSlider" name="ySlider">
+       <property name="maximum">
+        <number>360</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSlider" name="zSlider">
+       <property name="maximum">
+        <number>360</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="xLbl">
+       <property name="text">
+        <string>X rot</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="yLbl">
+       <property name="text">
+        <string>Y rot</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="zLbl">
+       <property name="text">
+        <string>Z rot</string>
+       </property>
       </widget>
      </item>
     </layout>
