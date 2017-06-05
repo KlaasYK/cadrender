@@ -54,7 +54,7 @@
   <widget class="QDockWidget" name="tessellationDock">
    <property name="minimumSize">
     <size>
-     <width>219</width>
+     <width>257</width>
      <height>200</height>
     </size>
    </property>
@@ -74,7 +74,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="shadingBox">
        <item>
         <property name="text">
          <string>Smooth shaded</string>
@@ -83,6 +83,51 @@
        <item>
         <property name="text">
          <string>Flat shaded</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Normal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Shaded patches</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Projected error</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Patch curvature</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Min edge size</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Max edge size</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Inner tessellation level</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Outer tessellation level</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Local curvature</string>
         </property>
        </item>
       </widget>

@@ -6,9 +6,18 @@
 #include <QFile>
 #include <QtDebug>
 
+#include <limits>
+
 BezierSceneImporter::BezierSceneImporter()
 {
-
+    minValues = QVector3D(
+                std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max(),
+                std::numeric_limits<float>::max());
+    maxValues = QVector3D(
+                std::numeric_limits<float>::min(),
+                std::numeric_limits<float>::min(),
+                std::numeric_limits<float>::min());
 }
 
 
@@ -18,7 +27,7 @@ BezierSceneImporter::~BezierSceneImporter() {
 
 
 
-QSharedPointer<BezierScene> BezierSceneImporter::importBezierScene(QString fileName) const
+QSharedPointer<BezierScene> BezierSceneImporter::importBezierScene(QString fileName)
 {
     QSharedPointer<BezierScene> scene(new BezierScene());
     QFile fin(fileName);
@@ -28,9 +37,10 @@ QSharedPointer<BezierScene> BezierSceneImporter::importBezierScene(QString fileN
     if (fin.open(QIODevice::ReadOnly)) {
         qInfo() << "Importing file:" << fileName;
         QTextStream in(&fin);
-        parseScene(in,vertices,indices,*scene.data());
+        parseScene(in, vertices, indices, *scene.data());
         scene->setIndexBuffer(indices);
         scene->setVertexBuffer(vertices);
+        scene->setModelMatrix(calculateModelMatrix());
     } else {
         qWarning() << "Could not open file:" << fileName;
     }
@@ -64,7 +74,7 @@ void BezierSceneImporter::parsePatch(
         const QStringList &tokens,
         QVector<QVector4D> &vertices,
         QVector<unsigned> &indices,
-        BezierScene &scene) const
+        BezierScene &scene)
 {
     Q_ASSERT(tokens.size() == 10 || tokens.size() == 11);
     QVector<QVector4D> patchVertices;
@@ -94,7 +104,7 @@ void BezierSceneImporter::parsePatch(
 void BezierSceneImporter::parseScene(QTextStream &in,
                                      QVector<QVector4D> &vertices,
                                      QVector<unsigned> &indices,
-                                     BezierScene &scene) const
+                                     BezierScene &scene)
 {
     QString line;
     QStringList tokens;
@@ -116,12 +126,56 @@ void BezierSceneImporter::parseScene(QTextStream &in,
 
 void BezierSceneImporter::parseVertex(
         const QStringList &tokens,
-        QVector<QVector4D> &vertices) const
+        QVector<QVector4D> &vertices)
 {
     Q_ASSERT(tokens.size() == 5);
     double x = tokens.at(1).toDouble();
     double y = tokens.at(2).toDouble();
     double z = tokens.at(3).toDouble();
     double w = tokens.at(4).toDouble();
-    vertices.push_back(QVector4D(x, y, z, w));
+    const QVector4D point(x, y, z, w);
+    checkMinMax(QVector3D(
+                    point.x() / point.w(),
+                    point.y() / point.w(),
+                    point.z() / point.w()));
+    vertices.push_back(point);
 }
+
+void BezierSceneImporter::checkMinMax(const QVector3D &point)
+{
+    if (point.x() > maxValues.x()) {
+        maxValues.setX(point.x());
+    }
+    if (point.x() < minValues.x()) {
+        minValues.setX(point.x());
+    }
+    if (point.y() > maxValues.y()) {
+        maxValues.setY(point.y());
+    }
+    if (point.y() < minValues.y()) {
+        minValues.setY(point.y());
+    }
+    if (point.z() > maxValues.z()) {
+        maxValues.setZ(point.z());
+    }
+    if (point.z() < minValues.z()) {
+        minValues.setZ(point.z());
+    }
+}
+
+const QMatrix4x4 BezierSceneImporter::calculateModelMatrix() const
+{
+    QMatrix4x4 modelMatrix;
+    QVector3D range = maxValues - minValues;
+
+    float scale = 1.0/std::max(range.x(),std::max(range.y(),range.z()));
+
+    modelMatrix.scale(scale);
+
+    modelMatrix.translate((-1.0 * minValues) - (0.5 * range));
+
+    return modelMatrix;
+}
+
+
+

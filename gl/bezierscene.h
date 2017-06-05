@@ -5,7 +5,7 @@
 #include <geom/beziertriangle.h>
 #include <util/beziersceneimporter.h>
 
-
+#include <QMatrix4x4>
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLShaderProgram>
 #include <QPair>
@@ -48,11 +48,15 @@ public:
     // TODO: add render settings (such as wireframe, faces etc.)
     void render(const QOpenGLShaderProgram &program);
 
+    const QMatrix4x4 getModelMatrix();
+
 protected:
 
     void addBezierTriangle(const BezierTriangle &patch);
 
     void setIndexBuffer(const QVector<unsigned> &indices);
+
+    void setModelMatrix(const QMatrix4x4 &modelMatrix);
 
     void setVertexBuffer(const QVector<QVector4D> &vertices);
 
@@ -72,6 +76,8 @@ private:
     // --- High level data store -----------------------------------------------
 
     QVector<QSharedPointer<BezierPatch>> _patches;
+
+    QMatrix4x4 _modelMatrix;
 
     // --- OpenGL members ------------------------------------------------------
 

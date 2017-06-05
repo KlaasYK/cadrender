@@ -11,5 +11,12 @@
         <file>shaders/tessellation/vertex.glsl</file>
         <file>shaders/simple/fragment.glsl</file>
         <file>shaders/simple/vertex.glsl</file>
+        <file>scenes/bezier/teapot.bezier</file>
+        <file>scenes/bezier/beziersphere.bezier</file>
+        <file>scenes/bezier/cone.bezier</file>
+        <file>scenes/bezier/rationalbeziersphere.bezier</file>
+        <file>scenes/bezier/slottedcylinder.bezier</file>
+        <file>scenes/bezier/splitin4.bezier</file>
+        <file>scenes/bezier/testblock.bezier</file>
     </qresource>
 </RCC>

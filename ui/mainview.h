@@ -7,6 +7,7 @@
 
 #include <QMatrix3x3>
 #include <QMatrix4x4>
+#include <QMouseEvent>
 #include <QOpenGLDebugLogger>
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLShaderProgram>
@@ -19,6 +20,18 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
     Q_OBJECT
 
     // =========================================================================
+    // -- Enumerators ----------------------------------------------------------
+    // =========================================================================
+
+    enum MouseState {
+        None = 0,
+        Rotate,
+        Scale,
+        Translate,
+        NUM_MOUSE_STATES
+    };
+
+    // =========================================================================
     // -- Constructors and destructor ------------------------------------------
     // =========================================================================
 
@@ -27,6 +40,15 @@ public:
     explicit MainView(QWidget *parent = 0);
 
     ~MainView();
+
+    // =========================================================================
+    // -- QWidget --------------------------------------------------------------
+    // =========================================================================
+public:
+
+    virtual void mousePressEvent(QMouseEvent *event) override;
+
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
 
     // =========================================================================
     // -- QOpenGLWidget --------------------------------------------------------
@@ -40,6 +62,8 @@ protected:
 
     virtual void resizeGL(int newWidth, int newHeight) override;
 
+
+
     // =========================================================================
     // -- Signals and slots ----------------------------------------------------
     // =========================================================================
@@ -51,7 +75,18 @@ signals:
 public slots:
 
     void onXRotation(int rotation);
+
     void onYRotation(int rotation);
+
+    void setDrawFaces(bool drawFaces);
+
+    void toggleDrawFaces();
+
+    void setDrawWireframe(bool drawWireframe);
+
+    void toggleWireFrame();
+
+    void setCurrentDrawingMode(int drawingMode);
 
 private slots:
 
@@ -83,7 +118,17 @@ private:
 
     int _xRot, _yRot;
 
+    QMatrix4x4 _rotationMatrix;
+
+    int _lastX, _lastY;
+
     GLuint _primitiveQuery;
+
+    MouseState _currentMouseState;
+
+    bool _drawFaces, _drawWireframe;
+
+    int _currentDrawingMode;
 
 };
 

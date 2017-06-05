@@ -13,10 +13,59 @@
 MainView::MainView(QWidget *parent) :
     QOpenGLWidget(parent),
     _xRot(0),
-    _yRot(0){}
+    _yRot(0),
+    _currentMouseState(MouseState::None),
+    _drawFaces(true),
+    _drawWireframe(false),
+    _currentDrawingMode(0) {}
 
 MainView::~MainView() {
     glDeleteQueries(1, &_primitiveQuery);
+}
+
+// =============================================================================
+// -- QWidget ------------------------------------------------------------------
+// =============================================================================
+
+void MainView::mousePressEvent(QMouseEvent *event) {
+
+    switch(event->button()) {
+    case Qt::LeftButton:
+        _currentMouseState = MouseState::Rotate;
+        break;
+    case Qt::RightButton:
+        _currentMouseState = MouseState::Translate;
+        break;
+    default:
+        _currentMouseState = MouseState::None;
+    }
+    _lastX = event->x();
+    _lastY = event->y();
+
+    this->setFocus();
+    update();
+}
+
+void MainView::mouseMoveEvent(QMouseEvent *event) {
+    int dx = event->x() - _lastX;
+    int dy = event->y() - _lastY;
+    _lastX = event->x();
+    _lastY = event->y();
+
+    switch(_currentMouseState) {
+    case MouseState::Rotate:
+    {
+        QMatrix4x4 rotationMatrix;
+        rotationMatrix.rotate(dx,0,1,0);
+        rotationMatrix.rotate(dy, 1, 0, 0);
+        _rotationMatrix = rotationMatrix * _rotationMatrix;
+    }
+        break;
+    default:
+        // Do nothing
+        break;
+    }
+    update();
 }
 
 // =============================================================================
@@ -66,16 +115,29 @@ void MainView::initializeGL() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    const BezierSceneImporter importer = BezierSceneImporter();
-    _scene = importer.importBezierScene(":/scenes/bezier/simpletriangle.bezier");
+    GLfloat range[2];
+    GLfloat granulatiry;
+
+    glGetFloatv(GL_LINE_WIDTH_RANGE, range);
+    glGetFloatv(GL_LINE_WIDTH_GRANULARITY, &granulatiry);
+
+    qDebug() << granulatiry;
+    qDebug() << range[0] << range[1];
+
+    //glEnable(GL_LINE_SMOOTH);
+    glLineWidth(1.0);
+
+    BezierSceneImporter importer = BezierSceneImporter();
+    _scene = importer.importBezierScene(":/scenes/bezier/teapot.bezier");
 }
 
 void MainView::paintGL() {
     QMatrix4x4 projection, model, view;
 
-    view.translate(0, 0, -10);
-    view.rotate(_xRot, 0, 1, 0);
-    view.rotate(_yRot, 1, 0, 0);
+    model = _scene->getModelMatrix();
+
+    view.translate(0, 0, -1.0);
+    view = view * _rotationMatrix;
 
 
     const int tessLevels[2] = {1,8};
@@ -87,10 +149,10 @@ void MainView::paintGL() {
     const float deviationTolerance = 1.0;
 
     const QVector4D materialProps = QVector4D(0.2, 0.8, 0.4, 20.0);
+    const QVector4D lineMaterial = QVector4D(0.5, 0.0, 0.0, 1.0);
     const QVector3D frontColor = QVector3D(1, 0, 0);
+    const QVector3D white = QVector3D(1,1,1);
     const QVector3D backColor = QVector3D(0, 1, 0);
-
-    const int drawingMode = 0; // Smooth
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -110,21 +172,32 @@ void MainView::paintGL() {
     _tessProgram->setUniformValue("Width", width());
     _tessProgram->setUniformValue("Height", height());
 
-    _tessProgram->setUniformValue("MaterialProps",materialProps);
-    _tessProgram->setUniformValue("ColorFront", frontColor);
-    _tessProgram->setUniformValue("ColorBack", backColor);
-    _tessProgram->setUniformValue("DrawingMode", drawingMode);
-
-     glBeginQuery(GL_PRIMITIVES_GENERATED, _primitiveQuery);
-    _scene->render(*_tessProgram);
+    glBeginQuery(GL_PRIMITIVES_GENERATED, _primitiveQuery);
+    if (_drawFaces) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        _tessProgram->setUniformValue("MaterialProps",materialProps);
+        _tessProgram->setUniformValue("ColorFront", frontColor);
+        _tessProgram->setUniformValue("ColorBack", backColor);
+        _tessProgram->setUniformValue("DrawingMode", _currentDrawingMode);
+        _scene->render(*_tessProgram);
+    }
     glEndQuery(GL_PRIMITIVES_GENERATED);
 
     int numPrimitives;
 
     glGetQueryObjectiv(_primitiveQuery, GL_QUERY_RESULT, &numPrimitives);
 
-    emit onPrimitivesDrawn(numPrimitives);
+    if (_drawWireframe) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        _tessProgram->setUniformValue("MaterialProps",lineMaterial);
+        _tessProgram->setUniformValue("ColorFront", white);
+        _tessProgram->setUniformValue("ColorBack", white);
+        _tessProgram->setUniformValue("DrawingMode", 0); // Smooth
+        _scene->render(*_tessProgram);
+    }
 
+
+    emit onPrimitivesDrawn(numPrimitives);
 
     _tessProgram->release();
 }
@@ -134,6 +207,12 @@ void MainView::resizeGL(int newWidth, int newHeight) {
     Q_UNUSED(newHeight);
     // TODO: resizeGL();
 }
+
+
+
+// =============================================================================
+// -- Signals and slots --------------------------------------------------------
+// =============================================================================
 
 void MainView::onXRotation(int rotation)
 {
@@ -147,9 +226,28 @@ void MainView::onYRotation(int rotation)
     update();
 }
 
-// =============================================================================
-// -- Signals and slots --------------------------------------------------------
-// =============================================================================
+void MainView::setDrawFaces(bool drawFaces) {
+    _drawFaces = drawFaces;
+}
+
+void MainView::toggleDrawFaces() {
+    _drawFaces = !_drawFaces;
+}
+
+void MainView::setDrawWireframe(bool drawWireframe) {
+    _drawWireframe = drawWireframe;
+    update();
+}
+
+void MainView::toggleWireFrame() {
+    _drawWireframe = !_drawWireframe;
+    update();
+}
+
+void MainView::setCurrentDrawingMode(int drawingMode) {
+    _currentDrawingMode = drawingMode;
+    update();
+}
 
 void MainView::onMessageLogged(QOpenGLDebugMessage message) {
     switch(message.severity()) {

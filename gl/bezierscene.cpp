@@ -36,7 +36,6 @@ void BezierScene::render(const QOpenGLShaderProgram &program)
 
     //program.bind();
 
-
     glBindVertexArray(_sceneVAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _patchIBO);
     glDrawElements(GL_PATCHES, _patches.size() * 10 , GL_UNSIGNED_INT, 0);
@@ -46,6 +45,10 @@ void BezierScene::render(const QOpenGLShaderProgram &program)
 
 
     //program.release();
+}
+
+const QMatrix4x4 BezierScene::getModelMatrix() {
+    return _modelMatrix;
 }
 
 // --- Protected ---------------------------------------------------------------
@@ -65,6 +68,10 @@ void BezierScene::setIndexBuffer(const QVector<unsigned> &indices){
                  indices.data(),
                  GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void BezierScene::setModelMatrix(const QMatrix4x4 &modelMatrix) {
+    _modelMatrix = QMatrix4x4(modelMatrix);
 }
 
 void BezierScene::setVertexBuffer(const QVector<QVector4D> &vertices)
