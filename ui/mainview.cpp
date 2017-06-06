@@ -14,12 +14,15 @@ MainView::MainView(QWidget *parent) :
     QOpenGLWidget(parent),
     _xRot(0),
     _yRot(0),
+    _scale(1.0),
     _currentMouseState(MouseState::None),
     _drawFaces(true),
     _drawWireframe(false),
     _currentDrawingMode(0),
     _edgeHeuristic(0),
-    _faceHeuristic(0){}
+    _faceHeuristic(0),
+    _minTessLevel(1),
+    _maxTessLevel(8){}
 
 MainView::~MainView() {
     glDeleteQueries(1, &_primitiveQuery);
@@ -67,6 +70,16 @@ void MainView::mouseMoveEvent(QMouseEvent *event) {
         // Do nothing
         break;
     }
+    update();
+}
+
+void MainView::wheelEvent(QWheelEvent *event) {
+    if (event->delta() > 0) {
+        _scale += 0.05;
+    } else {
+        _scale -= 0.05;
+    }
+    _scale = std::max(0.0f, std::min(10.0f, _scale));
     update();
 }
 
@@ -130,19 +143,20 @@ void MainView::initializeGL() {
     glLineWidth(1.0);
 
     BezierSceneImporter importer = BezierSceneImporter();
-    _scene = importer.importBezierScene(":/scenes/bezier/cone.bezier");
+    _scene = importer.importBezierScene(":/scenes/bezier/beziersphere.bezier");
 }
 
 void MainView::paintGL() {
     QMatrix4x4 projection, model, view;
 
     model = _scene->getModelMatrix();
+    model.scale(_scale);
 
     view.translate(0, 0, -1.0);
     view = view * _rotationMatrix;
 
 
-    const int tessLevels[2] = {1,8};
+    int tessLevels[2] = {_minTessLevel, _maxTessLevel};
 
     const float projectionTolerance = 1.0;
     const float deviationTolerance = 1.0;
@@ -188,6 +202,8 @@ void MainView::paintGL() {
 
     if (_drawWireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        model.scale(1.001f);
+        _tessProgram->setUniformValue("ModelViewMatrix", view * model);
         _tessProgram->setUniformValue("MaterialProps",lineMaterial);
         _tessProgram->setUniformValue("ColorFront", white);
         _tessProgram->setUniformValue("ColorBack", white);
@@ -250,12 +266,58 @@ void MainView::setCurrentDrawingMode(int drawingMode) {
 
 void MainView::setEdgeHeuristic(int heuristic) {
     _edgeHeuristic = heuristic;
+    qDebug() << "setEdgeHeuristic(" << heuristic << ")";
+    update();
 }
 
 void MainView::setFaceHeuristic(int heuristic) {
     _faceHeuristic = heuristic;
+    qDebug() << "setFaceHeuristic(" << heuristic << ")";
+    update();
 }
 
+void MainView::setTessellationLevels(int minLevel, int maxLevel) {
+    _minTessLevel = minLevel;
+    _maxTessLevel = maxLevel;
+    update();
+}
+
+void MainView::setScene(int sceneID) {
+    // Make sure the OpenGL context is current
+    this->makeCurrent();
+    BezierSceneImporter importer = BezierSceneImporter();
+    switch (sceneID) {
+    case 0:
+        _scene = importer.importBezierScene(":/scenes/bezier/beziersphere.bezier");
+        break;
+    case 1:
+        _scene = importer.importBezierScene(":/scenes/bezier/cone.bezier");
+        break;
+    case 2:
+        _scene = importer.importBezierScene(":/scenes/bezier/rationalbeziersphere.bezier");
+        break;
+    case 3:
+        _scene = importer.importBezierScene(":/scenes/bezier/simpletriangle.bezier");
+        break;
+    case 4:
+        _scene = importer.importBezierScene(":/scenes/bezier/slottedcylinder.bezier");
+        break;
+    case 5:
+        _scene = importer.importBezierScene(":/scenes/bezier/splitin4.bezier");
+        break;
+    case 6:
+        _scene = importer.importBezierScene(":/scenes/bezier/teapot.bezier");
+        break;
+    case 7:
+        _scene = importer.importBezierScene(":/scenes/bezier/testblock.bezier");
+        break;
+    default:
+        _scene = importer.importBezierScene(":/scenes/bezier/teapot.bezier");
+        break;
+    }
+    this->doneCurrent();
+    update();
+}
 
 void MainView::onMessageLogged(QOpenGLDebugMessage message) {
     switch(message.severity()) {

@@ -54,8 +54,8 @@
   <widget class="QDockWidget" name="tessellationDock">
    <property name="minimumSize">
     <size>
-     <width>301</width>
-     <height>290</height>
+     <width>345</width>
+     <height>324</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -171,14 +171,14 @@
        </item>
       </widget>
      </item>
-     <item row="6" column="0">
+     <item row="7" column="0">
       <widget class="QLabel" name="xLbl">
        <property name="text">
         <string>X rot</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="7" column="1">
       <widget class="QSlider" name="xSlider">
        <property name="maximum">
         <number>360</number>
@@ -188,14 +188,14 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="8" column="0">
       <widget class="QLabel" name="yLbl">
        <property name="text">
         <string>Y rot</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
+     <item row="8" column="1">
       <widget class="QSlider" name="ySlider">
        <property name="maximum">
         <number>360</number>
@@ -205,14 +205,14 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="zLbl">
        <property name="text">
         <string>Z rot</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="9" column="1">
       <widget class="QSlider" name="zSlider">
        <property name="maximum">
         <number>360</number>
@@ -222,7 +222,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <spacer name="vSpace">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -317,6 +317,57 @@
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Max tess. level</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="sceneBox">
+       <item>
+        <property name="text">
+         <string>Bezier sphere</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Cone</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rational sphere</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Simple triangle</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CAD cylinder</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Split in 4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Teapot</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CAD testblock</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Scene</string>
        </property>
       </widget>
      </item>

@@ -3,6 +3,8 @@
 
 #include <QApplication>
 #include <QStatusBar>
+#include <QComboBox>
+#include <QSpinBox>
 
 // ----------------------------------------------------------------------------
 // -- Constructors and destructor ---------------------------------------------
@@ -26,6 +28,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->shadingBox, SIGNAL(currentIndexChanged(int)),
            ui->mainView, SLOT(setCurrentDrawingMode(int)), Qt::QueuedConnection);
 
+    connect(ui->edgeHeuristicBox, SIGNAL(currentIndexChanged(int)),
+            ui->mainView, SLOT(setEdgeHeuristic(int)), Qt::QueuedConnection);
+
+    connect(ui->faceHeuristicBox, SIGNAL(currentIndexChanged(int)),
+            ui->mainView, SLOT(setFaceHeuristic(int)), Qt::QueuedConnection);
+
+    connect(ui->sceneBox, SIGNAL(currentIndexChanged(int)),
+            ui->mainView, SLOT(setScene(int)), Qt::QueuedConnection);
+
 }
 
 MainWindow::~MainWindow()
@@ -48,4 +59,20 @@ void MainWindow::aboutQt() {
 void MainWindow::onPrimitivesDrawn(int numPrimitives) {
     this->statusBar()->clearMessage();
     this->statusBar()->showMessage(QString("%1 primitives").arg(numPrimitives));
+}
+
+void MainWindow::on_minTessLevel_valueChanged(int level)
+{
+    Q_UNUSED(level);
+    ui->mainView->setTessellationLevels(
+                ui->minTessLevel->value(),
+                ui->maxTessLevel->value());
+}
+
+void MainWindow::on_maxTessLevel_valueChanged(int level)
+{
+    Q_UNUSED(level);
+    ui->mainView->setTessellationLevels(
+                ui->minTessLevel->value(),
+                ui->maxTessLevel->value());
 }

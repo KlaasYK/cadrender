@@ -207,13 +207,13 @@ vec3 heatMap(float val) {
 void main() {
 
   vec3 N;
-  // vec4 temp = evaluateCoord(N);
-  //vec3 interCoord = temp.xyz;
-  //vec3 errorDir = normalize(interCoord - vert_coord_FS_in.xyz);
-  //float weight = temp.w;
+  vec4 temp = evaluateCoord(N);
+  vec3 interCoord = temp.xyz;
+  vec3 errorDir = normalize(interCoord - vert_coord_FS_in.xyz);
+  float weight = temp.w;
   // Use normal passed from the Tess Eval shader
   // TODO: maybe look into a uniform/setting for this
-  N = normalize(vert_normal_FS_in);
+  //N = normalize(vert_normal_FS_in);
   //N = normalize(N);
 
   float SIZE_RANGE = (MaxTriangleSize - MinTriangleSize);
@@ -250,10 +250,10 @@ void main() {
 
     case Error:
       // Only error along the normal should be considered?
-      //error = abs(dot(errorDir, N)) *
-      //  clamp(distance(vert_coord_FS_in.xyz, interCoord) / 0.01, 0.0, 1.0);
+      error = abs(dot(errorDir, N)) *
+        clamp(distance(vert_coord_FS_in.xyz, interCoord) / 0.01, 0.0, 1.0);
       // TODO: determine limit (now 0.1)
-      //fColor = vec4(rainbowMap(error), 1.0);
+      fColor = vec4(rainbowMap(error), 1.0);
       break;
 
     case Curvature:

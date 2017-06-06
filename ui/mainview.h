@@ -44,11 +44,14 @@ public:
     // =========================================================================
     // -- QWidget --------------------------------------------------------------
     // =========================================================================
-public:
+
+protected:
 
     virtual void mousePressEvent(QMouseEvent *event) override;
 
     virtual void mouseMoveEvent(QMouseEvent *event) override;
+
+    virtual void wheelEvent(QWheelEvent *event) override;
 
     // =========================================================================
     // -- QOpenGLWidget --------------------------------------------------------
@@ -92,6 +95,10 @@ public slots:
 
     void setFaceHeuristic(int heuristic);
 
+    void setTessellationLevels(int minLevel, int maxLevel);
+
+    void setScene(int sceneID);
+
 private slots:
 
     void onMessageLogged(QOpenGLDebugMessage message);
@@ -126,6 +133,8 @@ private:
 
     int _lastX, _lastY;
 
+    float _scale;
+
     GLuint _primitiveQuery;
 
     MouseState _currentMouseState;
@@ -135,6 +144,7 @@ private:
     int _currentDrawingMode;
     int _edgeHeuristic;
     int _faceHeuristic;
+    int _minTessLevel, _maxTessLevel;
 
 };
 
