@@ -55,7 +55,7 @@
    <property name="minimumSize">
     <size>
      <width>345</width>
-     <height>324</height>
+     <height>365</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -102,7 +102,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Projected error</string>
+         <string>Surface error</string>
         </property>
        </item>
        <item>
@@ -171,14 +171,14 @@
        </item>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="9" column="0">
       <widget class="QLabel" name="xLbl">
        <property name="text">
         <string>X rot</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
+     <item row="9" column="1">
       <widget class="QSlider" name="xSlider">
        <property name="maximum">
         <number>360</number>
@@ -188,14 +188,14 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="10" column="0">
       <widget class="QLabel" name="yLbl">
        <property name="text">
         <string>Y rot</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="10" column="1">
       <widget class="QSlider" name="ySlider">
        <property name="maximum">
         <number>360</number>
@@ -205,14 +205,14 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
+     <item row="11" column="0">
       <widget class="QLabel" name="zLbl">
        <property name="text">
         <string>Z rot</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="1">
+     <item row="11" column="1">
       <widget class="QSlider" name="zSlider">
        <property name="maximum">
         <number>360</number>
@@ -222,7 +222,7 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="8" column="1">
       <spacer name="vSpace">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -320,7 +320,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="7" column="1">
       <widget class="QComboBox" name="sceneBox">
        <item>
         <property name="text">
@@ -362,12 +362,58 @@
          <string>CAD testblock</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Floating</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Extreme curvature</string>
+        </property>
+       </item>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="7" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Scene</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QDoubleSpinBox" name="tolerance">
+       <property name="suffix">
+        <string>px</string>
+       </property>
+       <property name="minimum">
+        <double>0.010000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>9999.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Tolerance</string>
        </property>
       </widget>
      </item>

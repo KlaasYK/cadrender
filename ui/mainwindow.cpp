@@ -5,6 +5,7 @@
 #include <QStatusBar>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 
 // ----------------------------------------------------------------------------
 // -- Constructors and destructor ---------------------------------------------
@@ -36,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->sceneBox, SIGNAL(currentIndexChanged(int)),
             ui->mainView, SLOT(setScene(int)), Qt::QueuedConnection);
+
+    connect(ui->tolerance, SIGNAL(valueChanged(double)),
+            ui->mainView, SLOT(setProjectionTolerance(double)), Qt::QueuedConnection);
 
 }
 

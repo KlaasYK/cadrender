@@ -53,6 +53,8 @@ protected:
 
     virtual void wheelEvent(QWheelEvent *event) override;
 
+    virtual void keyReleaseEvent(QKeyEvent *event) override;
+
     // =========================================================================
     // -- QOpenGLWidget --------------------------------------------------------
     // =========================================================================
@@ -98,6 +100,8 @@ public slots:
     void setTessellationLevels(int minLevel, int maxLevel);
 
     void setScene(int sceneID);
+
+    void setProjectionTolerance(double tolerance);
 
 private slots:
 
@@ -145,6 +149,8 @@ private:
     int _edgeHeuristic;
     int _faceHeuristic;
     int _minTessLevel, _maxTessLevel;
+
+    float _projectionTolerance;
 
 };
 

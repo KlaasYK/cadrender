@@ -18,5 +18,7 @@
         <file>scenes/bezier/slottedcylinder.bezier</file>
         <file>scenes/bezier/splitin4.bezier</file>
         <file>scenes/bezier/testblock.bezier</file>
+        <file>scenes/bezier/floating.bezier</file>
+        <file>scenes/bezier/extremecurvature.bezier</file>
     </qresource>
 </RCC>

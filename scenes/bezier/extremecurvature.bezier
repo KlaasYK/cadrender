@@ -1,0 +1,26 @@
+# Simple traingle
+
+# Uses a similar grammar as wavefront .obj files
+# Lines starting with a # are treated as comments
+# v denotes a vertex/controlpoint
+# v < x float> < y float> < z float> < weight float>
+# patches are denoted by a p
+# Number of elements may be 9 or 10 for Bezier Triangles
+# (If 9, the center point will be interpolated)
+# Or 16 for Bezier QuadPatches (not yet implemented)
+# Order for triangles (in barycentric coordinates)
+# 003, 102, 201, 300, 210, 120, 030, 021, 012, 111
+# Note! index starts at 0
+# p < v index > ... < v index >
+
+v 0.0 0.0 0.0 1.0
+v 1.0 0.0 0.0 1.0
+v 2.0 0.0 0.0 1.0
+v 3.0 0.0 0.0 1.0
+v 30.0 50.0 0.0 10.0
+v 30.0 -20.0 10.0 10.0
+v 1.5 3.0 1.0 1.0
+v 0.0 -20.0 10.0 10.0
+v 0.0 50.0 0.0 10.0
+
+p 0 1 2 3 4 5 6 7 8

@@ -3,6 +3,7 @@
 #include <util/beziersceneimporter.h>
 
 #include <QtDebug>
+#include <QImage>
 
 #include <iostream>
 
@@ -22,7 +23,8 @@ MainView::MainView(QWidget *parent) :
     _edgeHeuristic(0),
     _faceHeuristic(0),
     _minTessLevel(1),
-    _maxTessLevel(8){}
+    _maxTessLevel(8),
+    _projectionTolerance(1.0f){}
 
 MainView::~MainView() {
     glDeleteQueries(1, &_primitiveQuery);
@@ -80,6 +82,22 @@ void MainView::wheelEvent(QWheelEvent *event) {
         _scale -= 0.05;
     }
     _scale = std::max(0.0f, std::min(10.0f, _scale));
+    update();
+}
+
+void MainView::keyReleaseEvent(QKeyEvent *event) {
+
+    switch(event->key()) {
+    case Qt::Key_S:
+    {
+        QImage img = this->grabFramebuffer();
+        img.save("test.png");
+    }
+        break;
+    default:
+        // Do nothing
+        break;
+    }
     update();
 }
 
@@ -157,13 +175,12 @@ void MainView::paintGL() {
 
     int tessLevels[2] = {_minTessLevel, _maxTessLevel};
 
-    const float projectionTolerance = 1.0;
     const float deviationTolerance = 1.0;
 
     const QVector4D materialProps = QVector4D(0.2, 0.8, 0.4, 20.0);
-    const QVector4D lineMaterial = QVector4D(0.5, 0.0, 0.0, 1.0);
+    const QVector4D lineMaterial = QVector4D(1.0, 0.0, 0.0, 1.0);
     const QVector3D frontColor = QVector3D(1, 0, 0);
-    const QVector3D white = QVector3D(1,1,1);
+    const QVector3D white = QVector3D(0,0,1);
     const QVector3D backColor = QVector3D(0, 1, 0);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -178,7 +195,7 @@ void MainView::paintGL() {
     _tessProgram->setUniformValueArray("TessLevels", tessLevels, 2);
     _tessProgram->setUniformValue("EdgeHeuristic", _edgeHeuristic);
     _tessProgram->setUniformValue("FaceHeuristic", _faceHeuristic);
-    _tessProgram->setUniformValue("ProjectionTolerance", projectionTolerance);
+    _tessProgram->setUniformValue("ProjectionTolerance", _projectionTolerance);
     _tessProgram->setUniformValue("DeviationTolerance", deviationTolerance);
 
     _tessProgram->setUniformValue("Width", width());
@@ -310,11 +327,22 @@ void MainView::setScene(int sceneID) {
     case 7:
         _scene = importer.importBezierScene(":/scenes/bezier/testblock.bezier");
         break;
+    case 8:
+        _scene = importer.importBezierScene(":/scenes/bezier/floating.bezier");
+        break;
+    case 9:
+        _scene = importer.importBezierScene(":/scenes/bezier/extremecurvature.bezier");
+        break;
     default:
         _scene = importer.importBezierScene(":/scenes/bezier/teapot.bezier");
         break;
     }
     this->doneCurrent();
+    update();
+}
+
+void MainView::setProjectionTolerance(double tolerance) {
+    _projectionTolerance = static_cast<float>(tolerance);
     update();
 }
 
