@@ -147,10 +147,9 @@ void MainView::initializeGL() {
 }
 
 void MainView::paintGL() {
-    QMatrix4x4 projection, model, view;
-
-    model = _scene->getModelMatrix();
-    model.scale(_scale);
+    QMatrix4x4 projection, model, view, scale;
+    scale.scale(_scale);
+    model = scale * _scene->getModelMatrix();
 
     view.translate(0, 0, -1.0);
     view = view * _rotationMatrix;
