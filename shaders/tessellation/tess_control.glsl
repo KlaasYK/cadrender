@@ -1,4 +1,4 @@
-#version 450 core
+#version 410 core
 
 // =============================================================================
 // -- Defines ------------------------------------------------------------------
@@ -196,16 +196,29 @@ vec3 interpolateNormal(in vec3 uvw) {
 
 float calculateCurvature(in vec3 N) {
 
+  // FIXME: this is not correct
+
   // Calculate normals at the centers of the subtriangles
-  vec3 n0 = interpolateNormal(vec3(1.0 / 9.0, 1.0 / 9.0, 7.0 / 9.0));
-  vec3 n1 = interpolateNormal(vec3(4.0 / 9.0, 1.0 / 9.0, 5.0 / 9.0));
-  vec3 n2 = interpolateNormal(vec3(7.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0));
-  vec3 n3 = interpolateNormal(vec3(2.0 / 9.0, 2.0 / 9.0, 5.0 / 9.0));
-  vec3 n4 = interpolateNormal(vec3(5.0 / 9.0, 2.0 / 9.0, 2.0 / 9.0));
-  vec3 n5 = interpolateNormal(vec3(1.0 / 9.0, 4.0 / 9.0, 4.0 / 9.0));
-  vec3 n6 = interpolateNormal(vec3(4.0 / 9.0, 4.0 / 9.0, 1.0 / 9.0));
-  vec3 n7 = interpolateNormal(vec3(2.0 / 9.0, 5.0 / 9.0, 2.0 / 9.0));
-  vec3 n8 = interpolateNormal(vec3(1.0 / 9.0, 7.0 / 9.0, 1.0 / 9.0));
+  //vec3 n0 = interpolateNormal(vec3(1.0 / 9.0, 1.0 / 9.0, 7.0 / 9.0));
+  //vec3 n1 = interpolateNormal(vec3(4.0 / 9.0, 1.0 / 9.0, 5.0 / 9.0));
+  //vec3 n2 = interpolateNormal(vec3(7.0 / 9.0, 1.0 / 9.0, 1.0 / 9.0));
+  //vec3 n3 = interpolateNormal(vec3(2.0 / 9.0, 2.0 / 9.0, 5.0 / 9.0));
+  //vec3 n4 = interpolateNormal(vec3(5.0 / 9.0, 2.0 / 9.0, 2.0 / 9.0));
+  //vec3 n5 = interpolateNormal(vec3(1.0 / 9.0, 4.0 / 9.0, 4.0 / 9.0));
+  //vec3 n6 = interpolateNormal(vec3(4.0 / 9.0, 4.0 / 9.0, 1.0 / 9.0));
+  //vec3 n7 = interpolateNormal(vec3(2.0 / 9.0, 5.0 / 9.0, 2.0 / 9.0));
+  //vec3 n8 = interpolateNormal(vec3(1.0 / 9.0, 7.0 / 9.0, 1.0 / 9.0));
+
+  // Calculate normals at the corners, the center and center of edges
+  vec3 n0 = interpolateNormal(vec3(0, 0, 1)); // B003
+  vec3 n1 = interpolateNormal(vec3(1, 0, 0)); // B300
+  vec3 n2 = interpolateNormal(vec3(0, 1, 0)); // B030
+
+  vec3 n3 = interpolateNormal(vec3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0)); // B111
+
+  vec3 n4 = interpolateNormal(vec3(0.5, 0, 0.5)); // V0
+  vec3 n5 = interpolateNormal(vec3(0.5, 0.5, 0.0)); // W0
+  vec3 n6 = interpolateNormal(vec3(0.0, 0.5, 0.5)); // U0
 
   // Determine maximum deviation of the normal
   float f0 = dot(n0, N);
@@ -215,10 +228,10 @@ float calculateCurvature(in vec3 N) {
   float f4 = min(dot(n4, N), f3);
   float f5 = min(dot(n5, N), f4);
   float f6 = min(dot(n6, N), f5);
-  float f7 = min(dot(n7, N), f6);
-  float f8 = min(dot(n8, N), f7);
+  //float f7 = min(dot(n7, N), f6);
+  //float f8 = min(dot(n8, N), f7);
 
-  return f8;
+  return f6;
 }
 
 // --- Tessellation heuristic functions ----------------------------------------
@@ -256,11 +269,11 @@ float curvatureEdge(
   vec3 T = normalize(stripWeight(v1) - stripWeight(v0));
 
   // Calculate tangents in between
-  vec3 t0 = interpolateTangent(1.0 / 6.0, v0, e0, e1, v1);
-  vec3 t1 = interpolateTangent(3.0 / 6.0, v0, e0, e1, v1);
-  vec3 t2 = interpolateTangent(5.0 / 6.0, v0, e0, e1, v1);
-  vec3 t3 = interpolateTangent(2.0 / 6.0, v0, e0, e1, v1);
-  vec3 t4 = interpolateTangent(4.0 / 6.0, v0, e0, e1, v1);
+  vec3 t0 = interpolateTangent(0.0 / 6.0, v0, e0, e1, v1);
+  vec3 t1 = interpolateTangent(2.0 / 6.0, v0, e0, e1, v1);
+  vec3 t2 = interpolateTangent(3.0 / 6.0, v0, e0, e1, v1);
+  vec3 t3 = interpolateTangent(4.0 / 6.0, v0, e0, e1, v1);
+  vec3 t4 = interpolateTangent(6.0 / 6.0, v0, e0, e1, v1);
 
   // Find the most divergent tangent
   float f0 = dot(t0, T);
@@ -295,9 +308,16 @@ float curvatureFace(in vec3 N, in float curvature) {
 /// Calculate the face tessellation level using the
 /// screen space normal heuristic
 float screenSpaceNormalFace(in vec3 N) {
-  // TODO: perform a similar approach to the Curvature!
-  // Probably store the results somewhere
-  float factor = 1 - abs(dot(vec3(0, 0, 1), N));
+
+  vec3 v0 = stripWeight(vert_coord_CS_in[UV003]);
+  vec3 v1 = stripWeight(vert_coord_CS_in[UV300]);
+  vec3 v2 = stripWeight(vert_coord_CS_in[UV030]);
+
+  vec3 vc = (v0+v1+v2)/3.0;
+  vec3 vn = normalize(-vc);
+
+  float normalDeviation = calculateCurvature(vn);
+  float factor = pow(1 - clamp(normalDeviation, 0.0, 1.0), 1.0 / 3.0);
   return mix(
       TessLevels[MinLevel],
       TessLevels[MaxLevel],
@@ -379,7 +399,7 @@ void main() {
     vec3 N  = normalize(cross(normalize(v1 - v0), normalize(v2 - v0)));
     float curvature = calculateCurvature(N);
     // transform [1, -1] to [0, 1] (0 no curvature, 1 max, can be > 1)
-    patch_curvature_ES_in = (1 - curvature);
+    patch_curvature_ES_in = pow(clamp((1 - curvature), 0.0, 1.0), 1.0 / 3.0);
 
     // =========================================================================
     // -- Implementation -------------------------------------------------------

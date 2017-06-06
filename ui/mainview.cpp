@@ -17,7 +17,9 @@ MainView::MainView(QWidget *parent) :
     _currentMouseState(MouseState::None),
     _drawFaces(true),
     _drawWireframe(false),
-    _currentDrawingMode(0) {}
+    _currentDrawingMode(0),
+    _edgeHeuristic(0),
+    _faceHeuristic(0){}
 
 MainView::~MainView() {
     glDeleteQueries(1, &_primitiveQuery);
@@ -128,7 +130,7 @@ void MainView::initializeGL() {
     glLineWidth(1.0);
 
     BezierSceneImporter importer = BezierSceneImporter();
-    _scene = importer.importBezierScene(":/scenes/bezier/teapot.bezier");
+    _scene = importer.importBezierScene(":/scenes/bezier/cone.bezier");
 }
 
 void MainView::paintGL() {
@@ -141,9 +143,6 @@ void MainView::paintGL() {
 
 
     const int tessLevels[2] = {1,8};
-
-    const int edgeHeuristic = 5; // min proj, curv
-    const int faceHeuristic = 5; // min proj, curv
 
     const float projectionTolerance = 1.0;
     const float deviationTolerance = 1.0;
@@ -164,8 +163,8 @@ void MainView::paintGL() {
     _tessProgram->setUniformValue("ProjectionMatrix", projection);
     _tessProgram->setUniformValue("ModelViewMatrix", view * model);
     _tessProgram->setUniformValueArray("TessLevels", tessLevels, 2);
-    _tessProgram->setUniformValue("EdgeHeuristic", edgeHeuristic);
-    _tessProgram->setUniformValue("FaceHeuristic", faceHeuristic);
+    _tessProgram->setUniformValue("EdgeHeuristic", _edgeHeuristic);
+    _tessProgram->setUniformValue("FaceHeuristic", _faceHeuristic);
     _tessProgram->setUniformValue("ProjectionTolerance", projectionTolerance);
     _tessProgram->setUniformValue("DeviationTolerance", deviationTolerance);
 
@@ -248,6 +247,15 @@ void MainView::setCurrentDrawingMode(int drawingMode) {
     _currentDrawingMode = drawingMode;
     update();
 }
+
+void MainView::setEdgeHeuristic(int heuristic) {
+    _edgeHeuristic = heuristic;
+}
+
+void MainView::setFaceHeuristic(int heuristic) {
+    _faceHeuristic = heuristic;
+}
+
 
 void MainView::onMessageLogged(QOpenGLDebugMessage message) {
     switch(message.severity()) {

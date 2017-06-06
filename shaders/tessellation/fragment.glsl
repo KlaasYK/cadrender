@@ -1,4 +1,4 @@
-#version 450 core
+#version 410 core
 
 // =============================================================================
 // -- Defines ------------------------------------------------------------------
@@ -17,9 +17,11 @@
 #define Barycentric 4
 #define Error 5
 #define Curvature 6
-#define TriangleSize 7
-#define InnerTessLevel 8
-#define OuterTessLevel 9
+#define MinTriangleSizeMode 7
+#define MaxTriangleSizeMode 8
+#define InnerTessLevel 9
+#define OuterTessLevel 10
+#define LocalCurvature 11
 
 /// Defines for vertex coord array offsets
 #define UV003 0
@@ -34,8 +36,8 @@
 #define UV111 9
 #define NUM_CONTROL_POINTS 10
 
-#define MinTriangleSize 3.0
-#define MaxTriangleSize 100.0
+#define MinTriangleSize 2.0
+#define MaxTriangleSize 50.0
 
 // =============================================================================
 // -- In and outputs -----------------------------------------------------------
@@ -51,9 +53,11 @@ flat in vec3 patch_color_FS_in;
 flat in vec3 flat_normal_FS_in;
 flat in vec4 control_coord_FS_in[NUM_CONTROL_POINTS];
 flat in float patch_curvature_FS_in;
-flat in float triangle_size_FS_in;
+flat in float max_triangle_size_FS_in;
+flat in float min_triangle_size_FS_in;
 flat in float inner_tess_level_FS_in;
 flat in float outer_tess_level_FS_in;
+flat in float local_curvature_FS_in;
 
 // --- Outputs -----------------------------------------------------------------
 
@@ -94,7 +98,7 @@ vec4 interpolate4D(in vec4 v0, in vec4 v1, in vec4 v2) {
 
 /// Calculate the coordinated if the bezier triangle
 /// were to be evaluated at each fragment using barycenter_FS_in
-/// Also can output the normal at the coordinate
+/// Also output the normal at the coordinate
 vec4 evaluateCoord(out vec3 interpolatedNormal) {
 
   // Cubic to quadratic triangle
@@ -189,84 +193,108 @@ vec3 rainbowMap(float val) {
   return color;
 }
 
+vec3 heatMap(float val) {
+  float r = clamp(8.0 / 3.0 * val, 0.0, 1.0);
+  float g = clamp(8.0 / 3.0 * val - 1.0, 0.0, 1.0);
+  float b = clamp(4.0 * val - 3.0, 0.0, 1.0);
+  return vec3(r, g, b);
+}
+
 // =============================================================================
-// -- Implementation -----------------------------------------------------------
+// -- Main ---------------------------------------------------------------------
 // =============================================================================
 
 void main() {
 
   vec3 N;
-  // TODO: either select interpolated normal,
-  // or evaluate normal
-  vec4 temp = evaluateCoord(N);
-  vec3 interCoord = temp.xyz;
-  float weight = temp.w;
-
+  // vec4 temp = evaluateCoord(N);
+  //vec3 interCoord = temp.xyz;
+  //vec3 errorDir = normalize(interCoord - vert_coord_FS_in.xyz);
+  //float weight = temp.w;
+  // Use normal passed from the Tess Eval shader
+  // TODO: maybe look into a uniform/setting for this
   N = normalize(vert_normal_FS_in);
+  //N = normalize(N);
 
-  // Take pink when functions does not work!
-  fColor = vec4(1.0, 0.75, 0.8, 1.0);
+  float SIZE_RANGE = (MaxTriangleSize - MinTriangleSize);
+  float TESS_RANGE = (TessLevels[MaxLevel] - TessLevels[MinLevel]);
 
-  // If statements are allowed for Uniforms
-  if (DrawingMode == SmoothShaded) {
-    fColor = smoothShaded(ColorFront, ColorBack, N);
-  }
+  float error;
+  float offset;
+  float val;
 
-  if (DrawingMode == FlatShaded) {
-    fColor = smoothShaded(ColorFront, ColorBack, flat_normal_FS_in);
-  }
+  // Switch based on selected drawingmode;
+  switch (DrawingMode) {
+    case SmoothShaded:
+      fColor = smoothShaded(ColorFront, ColorBack, N);
+      break;
 
-  if (DrawingMode == Normal) {
-    fColor = normalColorMap(N);
-  }
+    case FlatShaded:
+      fColor = smoothShaded(ColorFront, ColorBack, flat_normal_FS_in);
+      break;
 
-  if (DrawingMode == PatchesShaded) {
-    fColor = smoothShaded(
-          patch_color_FS_in,
-          0.8 * ColorBack + 0.2 * patch_color_FS_in,
-          N);
-  }
+    case Normal:
+      fColor = normalColorMap(N);
+      break;
 
-  if (DrawingMode == Barycentric) {
-    fColor = vec4(barycenter_FS_in, 1.0);
-  }
+    case PatchesShaded:
+      fColor = smoothShaded(
+            patch_color_FS_in,
+            0.8 * ColorBack + 0.2 * patch_color_FS_in,
+            N);
+      break;
 
-  if (DrawingMode == Error) {
-    vec3 interpolated = interCoord;
-    vec3 dir = normalize(interpolated - vert_coord_FS_in.xyz);
-    vec3 N = normalize(N);
-    // Only error along the normal should be considered?
-    float d = abs(dot(dir, N)) *
-      clamp(distance(vert_coord_FS_in.xyz, interpolated) / 0.01, 0.0, 1.0);
-    // TODO: determine limit (now 0.1)
-    fColor = vec4(rainbowMap(d), 1.0);
-  }
+    case Barycentric:
+      fColor = vec4(barycenter_FS_in, 1.0);
+      break;
 
-  if (DrawingMode == Curvature) {
-    // Curvature
-    fColor = vec4(rainbowMap(patch_curvature_FS_in), 1.0);
-  }
+    case Error:
+      // Only error along the normal should be considered?
+      //error = abs(dot(errorDir, N)) *
+      //  clamp(distance(vert_coord_FS_in.xyz, interCoord) / 0.01, 0.0, 1.0);
+      // TODO: determine limit (now 0.1)
+      //fColor = vec4(rainbowMap(error), 1.0);
+      break;
 
-  if (DrawingMode == TriangleSize) {
-    float RANGE = (MaxTriangleSize - MinTriangleSize);
-    float offset = (triangle_size_FS_in - MinTriangleSize);
-    // Invert the clamp (blue is large, red is small)
-    float val = 1 - clamp( offset / RANGE, 0.0, 1.0);
-    fColor = vec4(rainbowMap(val), 1.0);
-  }
+    case Curvature:
+      fColor = vec4(rainbowMap(patch_curvature_FS_in), 1.0);
+      break;
 
-  if (DrawingMode == InnerTessLevel) {
-    float RANGE = (TessLevels[MaxLevel] - TessLevels[MinLevel]);
-    float offset = (inner_tess_level_FS_in - TessLevels[MinLevel]);
-    float val = clamp( offset / RANGE, 0.0, 1.0);
-    fColor = vec4(rainbowMap(val), 1.0);
-  }
+    case MinTriangleSizeMode:
+      offset = (min_triangle_size_FS_in - MinTriangleSize);
+      // Invert the clamp (blue is large, red is small)
+      val = 1 - clamp( offset / SIZE_RANGE, 0.0, 1.0);
+      fColor = vec4(rainbowMap(val), 1.0);
+      break;
 
-  if (DrawingMode == OuterTessLevel) {
-    float RANGE = (TessLevels[MaxLevel] - TessLevels[MinLevel]);
-    float offset = (outer_tess_level_FS_in - TessLevels[MinLevel]);
-    float val = clamp( offset / RANGE, 0.0, 1.0);
-    fColor = vec4(rainbowMap(val), 1.0);
+    case MaxTriangleSizeMode:
+      offset = (max_triangle_size_FS_in - MinTriangleSize);
+      // Invert the clamp (blue is large, red is small)
+      val = 1 - clamp( offset / SIZE_RANGE, 0.0, 1.0);
+      fColor = vec4(rainbowMap(val), 1.0);
+      break;
+
+    case InnerTessLevel:
+      offset = (inner_tess_level_FS_in - TessLevels[MinLevel]);
+      val = clamp( offset / TESS_RANGE, 0.0, 1.0);
+      fColor = vec4(rainbowMap(val), 1.0);
+      break;
+
+    case OuterTessLevel:
+      offset = (outer_tess_level_FS_in - TessLevels[MinLevel]);
+      val = clamp( offset / TESS_RANGE, 0.0, 1.0);
+      fColor = vec4(rainbowMap(val), 1.0);
+      break;
+
+    case LocalCurvature:
+      fColor = vec4(rainbowMap(local_curvature_FS_in), 1.0);
+      break;
+
+    default:
+      // Default color is pink, in case of uknown drawingmode.
+      fColor = vec4(1.0, 0.75, 0.8, 1.0);
+      break;
+
   }
 
 }

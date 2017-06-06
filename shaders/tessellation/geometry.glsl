@@ -1,4 +1,4 @@
-#version 450 core
+#version 410 core
 
 // =============================================================================
 // -- Defines ------------------------------------------------------------------
@@ -22,12 +22,15 @@ in vec3 vert_normal_GS_in[];
 
 in vec3 patch_color_GS_in[];
 
+// Needs Interface Block to pass the array of control points
 in ControlCoords {
   vec4 control_coord_GS_in[NUM_CONTROL_POINTS];
 } controls[];
+
 in float patch_curvature_GS_in[];
 in float inner_tess_level_GS_in[];
 in float outer_tess_level_GS_in[];
+in vec3 patch_normal_GS_in[];
 
 // --- Outputs -----------------------------------------------------------------
 
@@ -44,9 +47,11 @@ flat out vec3 patch_color_FS_in;
 flat out vec4 control_coord_FS_in[NUM_CONTROL_POINTS];
 flat out float patch_curvature_FS_in;
 flat out vec3 flat_normal_FS_in;
-flat out float triangle_size_FS_in;
+flat out float max_triangle_size_FS_in;
+flat out float min_triangle_size_FS_in;
 flat out float inner_tess_level_FS_in;
 flat out float outer_tess_level_FS_in;
+flat out float local_curvature_FS_in;
 
 // =============================================================================
 // -- Uniforms -----------------------------------------------------------------
@@ -95,12 +100,14 @@ void main() {
 
   flat_normal_FS_in = normalize(cross(n0, n1));
 
-  // TODO use width and height from a uniform to calculate real distance
+  local_curvature_FS_in = (1 - dot(patch_normal_GS_in[0], flat_normal_FS_in)) / 2.0;
+
   float u0 = distanceProjectedPoints(gl_in[2].gl_Position, gl_in[0].gl_Position);
   float v0 = distanceProjectedPoints(gl_in[1].gl_Position, gl_in[0].gl_Position);
   float w0 = distanceProjectedPoints(gl_in[2].gl_Position, gl_in[1].gl_Position);
 
-  triangle_size_FS_in = max(max(u0, v0), w0);
+  max_triangle_size_FS_in = max(max(u0, v0), w0);
+  min_triangle_size_FS_in = min(min(u0, v0), w0);
 
   emitPerVertex(0);
   emitPerVertex(1);

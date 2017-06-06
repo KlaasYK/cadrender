@@ -88,6 +88,10 @@ public slots:
 
     void setCurrentDrawingMode(int drawingMode);
 
+    void setEdgeHeuristic(int heuristic);
+
+    void setFaceHeuristic(int heuristic);
+
 private slots:
 
     void onMessageLogged(QOpenGLDebugMessage message);
@@ -129,6 +133,8 @@ private:
     bool _drawFaces, _drawWireframe;
 
     int _currentDrawingMode;
+    int _edgeHeuristic;
+    int _faceHeuristic;
 
 };
 
